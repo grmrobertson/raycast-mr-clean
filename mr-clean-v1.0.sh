@@ -40,11 +40,11 @@ source "$FUNCTIONS_FILE" || {
 directory_path=$1
 undo_cleaning=$2
 
-# If no directory provided, get current Finder directory
+# If no directory provided, use ~/Downloads as default
 if [ -z "$directory_path" ]; then
-  directory_path=$(osascript -e 'tell application "Finder" to get POSIX path of (target of front window as alias)')
+  directory_path="$HOME/Downloads"
 
-  echo "No directory provided, using current Finder directory: $directory_path"
+  echo "No directory provided, using default directory: $directory_path"
 fi
 
 # handle invalid directory

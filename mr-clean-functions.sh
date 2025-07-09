@@ -3,6 +3,11 @@
 # Constants #
 export CALLING_CARD_FILE_NAME="mr_clean_was_here.txt"
 
+# Configuration #
+# Set to "true" to use change time (when file was downloaded/copied)
+# Set to "false" to use birth time (when file was originally created)
+export USE_CHANGE_TIME="false"
+
 # Helper functions #
 sort_files_by_date() {
   file=$1
@@ -29,10 +34,15 @@ sort_by_date() {
   local entity_name=$(basename "$entity")
   local parent_dir=$(dirname "$entity")
 
-  # get the creation time in seconds
-  local entity_creation_time=$(stat -f "%B" "$entity")
+  # get the timestamp in seconds based on configuration
+  local entity_creation_time
+  if [ "$USE_CHANGE_TIME" = "true" ]; then
+    entity_creation_time=$(stat -f "%c" "$entity")  # Change time (when downloaded/copied)
+  else
+    entity_creation_time=$(stat -f "%B" "$entity")  # Birth time (original creation)
+  fi
 
-  # convert the creation time to a human readable format
+  # convert the timestamp to a human readable format
   local entity_creation_month=$(date -r "$entity_creation_time" "+%Y-%m")
   
    # Remove trailing slash from target_dir_path if it exists
@@ -174,7 +184,7 @@ organise_directory() {
 
   #  Create mr clean was here file in the source directory
   if [ "$target_dir_path" = "$directory_path" ]; then
-    echo "Last visited by Mr. Clean on $(date)" > "$target_dir_path/$calling_card_file_name"
+    echo "Last visited by Mr. Clean on $(date)" > "$target_dir_path/$CALLING_CARD_FILE_NAME"
   fi
 }
 
@@ -212,8 +222,8 @@ flatten_directory() {
   done
 
   # Remove the calling card if it exists
-  if [ -f "$target_dir/$calling_card_file_name" ]; then
-      rm "$target_dir/$calling_card_file_name"
+  if [ -f "$target_dir/$CALLING_CARD_FILE_NAME" ]; then
+      rm "$target_dir/$CALLING_CARD_FILE_NAME"
   fi
   
   echo "Directory structure has been flattened!"
